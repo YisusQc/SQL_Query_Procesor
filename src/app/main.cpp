@@ -3,6 +3,7 @@
 #include "../lexer/Lexer.h"
 #include "../parser/Grammar.h"
 #include "../parser/FirstFollow.h"
+#include "../parser/ParsingTable.h"
 
 #define GREEN_COLOR "\033[32m"
 #define BLUE_COLOR "\033[34m"
@@ -110,6 +111,22 @@ int main() {
   firstFollow.printFirstSets();
   firstFollow.printFollowSets();
   firstFollow.printLL1Conflicts();
+
+
+  // Construccion de la tabla LL(1)
+
+  ParsingTable parsingTable(grammar, firstFollow);
+
+  parsingTable.printTable();
+
+  std::cout << "\n========== ESTADO DE LA TABLA ==========\n";
+
+  if (parsingTable.isValid()) {
+    std::cout << "Tabla predictiva construida correctamente.\n";
+    std::cout << "Tabla LL(1) válida.\n";
+  } else {
+    std::cout << "Error: se encontraron conflictos en la tabla.\n";
+  }
  
   return 0;
 }
