@@ -2,6 +2,7 @@
 #include <vector>
 #include "../lexer/Lexer.h"
 #include "../parser/Grammar.h"
+#include "../parser/FirstFollow.h"
 
 #define GREEN_COLOR "\033[32m"
 #define BLUE_COLOR "\033[34m"
@@ -100,6 +101,15 @@ int main() {
   }
 
   std::cout << "\nTotal de producciones: " << grammar.getProductions().size() << "\n";
+
+
+  // Calculo de FIRST y FOLLOW
+
+  FirstFollow firstFollow(grammar);
+
+  firstFollow.printFirstSets();
+  firstFollow.printFollowSets();
+  firstFollow.printLL1Conflicts();
  
   return 0;
 }

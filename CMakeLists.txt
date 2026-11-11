@@ -8,12 +8,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(sql_processor
   src/app/main.cpp
-
   # Lexer
   src/lexer/Lexer.cpp
-
   # Parser
   src/parser/Grammar.cpp
+  src/parser/FirstFollow.cpp
 )
 
 target_include_directories(sql_processor PRIVATE
