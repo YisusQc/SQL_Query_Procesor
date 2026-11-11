@@ -1,7 +1,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include "Token.h"
+#include "../common/Token.h"
 #include "Keywords.h"
 #include <string>
 #include <vector>

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
-#include "Lexer.h"
+#include "../lexer/Lexer.h"
+#include "../parser/Grammar.h"
 
 #define GREEN_COLOR "\033[32m"
 #define BLUE_COLOR "\033[34m"
@@ -50,6 +51,9 @@ void printAnalisis(const std::vector<Token>& tokens)
 }
 
 int main() {
+
+  // PRUEBA DE LEXER
+  
   std::string sqlQuery1 = "SELECT nombre, edad FROM estudiantes WHERE edad >= 18;";
   std::string sqlQuery2 = "SelEcT * FroM estudiantes wHErE nombre <> 'Jesus AnD edad <= 23;";
   std::string sqlQuery3 = "select nombre, score from \nestudiantes where nombre <> 'Jesus' \nand score <= 15.234 or ID # '4321;";
@@ -73,6 +77,29 @@ int main() {
   std::cout << BLUE_COLOR << "\n[sqlQuery3]: " << GREEN_COLOR << sqlQuery3 << RESET_COLOR << "\n";
   std::cout << MAGENTA_COLOR << "\nAnálisis Léxico: [Lexema | Tipo de token | Línea | Columna]" << RESET_COLOR << "\n";
   printAnalisis(tokens3);
+
+
+  // PRUEBA DE LA GRAMATICA
+
+  std::cout << "\n\nProducciones de la gramatica LL(1):\n";
+
+  Grammar grammar;
+
+  for (const auto& production : grammar.getProductions()) {
+    std::cout << "(" << production.id << ") " << toString(production.lhs) << " -> ";
+
+    if (production.rhs.empty()) {
+      std::cout << "epsilon";
+    } else {
+      for (const auto& symbol : production.rhs) {
+        std::cout << toString(symbol) << " ";
+      }
+    }
+
+    std::cout << "\n";
+  }
+
+  std::cout << "\nTotal de producciones: " << grammar.getProductions().size() << "\n";
  
   return 0;
 }

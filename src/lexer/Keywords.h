@@ -1,7 +1,7 @@
 #ifndef KEYWORDS_H
 #define KEYWORDS_H
 
-#include "Token.h"
+#include "../common/Token.h"
 #include <unordered_map>
 #include <string>
 #include <algorithm>

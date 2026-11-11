@@ -1,0 +1,15 @@
+# Directorios de compilación
+build/
+
+# Ejecutables
+main
+sql_processor
+lexer_demo
+
+# Archivos objeto
+*.o
+*.out
+
+# Archivos temporales
+*.log
+
