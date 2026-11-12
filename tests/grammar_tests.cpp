@@ -31,6 +31,8 @@ int main() {
 
   firstFollow.printFirstSets();
   firstFollow.printFollowSets();
+  ParsingTable parsingTable(grammar, firstFollow);
+  parsingTable.printTable();
   firstFollow.printLL1Conflicts();
 
   std::cout << "\n\n========== PRUEBAS DE GRAMATICA ==========\n";
