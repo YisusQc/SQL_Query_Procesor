@@ -1,15 +1,24 @@
-# Directorios de compilación
+# CMake
 build/
+cmake-build-*/
 
 # Ejecutables
 main
 sql_processor
-lexer_demo
+lexer_tests
+grammar_tests
+parser_tests
 
-# Archivos objeto
+# Objetos y bibliotecas
 *.o
-*.out
+*.a
+*.so
 
 # Archivos temporales
 *.log
+*.out
+
+# Editor
+.vscode/
+.idea/
 

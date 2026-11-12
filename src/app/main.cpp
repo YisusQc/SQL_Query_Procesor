@@ -1,170 +1,90 @@
-#include <iostream>
-#include <vector>
 #include "../lexer/Lexer.h"
 #include "../parser/Grammar.h"
 #include "../parser/FirstFollow.h"
 #include "../parser/ParsingTable.h"
 #include "../parser/Parser.h"
 
-#define GREEN_COLOR "\033[32m"
-#define BLUE_COLOR "\033[34m"
-#define MAGENTA_COLOR "\033[35m"
-#define RESET_COLOR "\033[0m"
+#include <iostream>
+#include <fstream>
+#include <iterator>
+#include <string>
 
-std::unordered_map<TokenType, std::string> tokenTypes =
-{
-  {TokenType::KEYWORD_SELECT, "KEYWORD_SELECT"},
-  {TokenType::KEYWORD_FROM, "KEYWORD_FROM"},
-  {TokenType::KEYWORD_WHERE, "KEYWORD_WHERE"},
-  {TokenType::KEYWORD_AND, "KEYWORD_AND"},
-  {TokenType::KEYWORD_OR, "KEYWORD_OR"},
-  {TokenType::IDENTIFIER, "IDENTIFIER"},
-  {TokenType::INTEGER_LITERAL, "INTEGER_LITERAL"},
-  {TokenType::DECIMAL_LITERAL, "DECIMAL_LITERAL"},
-  {TokenType::STRING_LITERAL, "STRING_LITERAL"},
-  {TokenType::OP_EQUAL, "OP_EQUAL"},
-  {TokenType::OP_NOT_EQUAL, "OP_NOT_EQUAL"},
-  {TokenType::OP_LESS, "OP_LESS"},
-  {TokenType::OP_GREATER, "OP_GREATER"},
-  {TokenType::OP_LESS_EQUAL, "OP_LESS_EQUAL"},
-  {TokenType::OP_GREATER_EQUAL, "OP_GREATER_EQUAL"},
-  {TokenType::COMMA, "COMMA"},
-  {TokenType::SEMICOLON, "SEMICOLON"},
-  {TokenType::STAR, "STAR"},
-  {TokenType::TOKEN_EOF, "TOKEN_EOF"},
-  {TokenType::TOKEN_ERROR, "TOKEN_ERROR"},
-};
+int main(int argc, char* argv[]) {
 
-std::string printTokenType(TokenType type, const std::unordered_map<TokenType, std::string>& tokenTypes)
-{
-  auto it = tokenTypes.find(type);
-  if (it != tokenTypes.end())
-    return it->second;
-  return "UNKNOWN_TOKEN";
-}
+  std::string query;
 
-void printAnalisis(const std::vector<Token>& tokens)
-{
-  for (const auto& token : tokens) {
-    std::cout << token.lexeme << " | " 
-    << printTokenType(token.type, tokenTypes) << " | " 
-    << token.pos.line << " | " 
-    << token.pos.column << "\n";
+  // 1. Obtener la consulta
+
+  if (argc > 1) {
+
+    std::ifstream file(argv[1]);
+
+    if (!file.is_open()) {
+      std::cerr << "No se pudo abrir el archivo: " << argv[1] << "\n";
+
+      return 1;
+    }
+
+    query.assign(
+      std::istreambuf_iterator<char>(file),
+      std::istreambuf_iterator<char>()
+    );
+
+  } else {
+
+    std::cout << "Ingrese una consulta SQL:\n";
+
+    query.assign(
+      std::istreambuf_iterator<char>(std::cin),
+      std::istreambuf_iterator<char>()
+    );
   }
-}
 
-int main() {
+  if (query.empty()) {
+    std::cerr << "No se proporcionó ninguna consulta.\n";
+    return 1;
+  }
 
-  // PRUEBA DE LEXER
-  
-  std::string sqlQuery1 = "SELECT nombre, edad FROM estudiantes WHERE edad >= 18;";
-  std::string sqlQuery2 = "SelEcT * FroM estudiantes wHErE nombre <> 'Jesus AnD edad <= 23;";
-  std::string sqlQuery3 = "select nombre, score from \nestudiantes where nombre <> 'Jesus' \nand score <= 15.234 or ID # '4321;";
-  std::string sqlQuery4 = "SELECT nombre FROM estudiantes WHERE edad >= ;";
+  // 2. Analisis lexico
 
-  Lexer lexer1(sqlQuery1);
-  Lexer lexer2(sqlQuery2);
-  Lexer lexer3(sqlQuery3);
-  Lexer lexer4(sqlQuery4);
-  
-  std::vector<Token> tokens1 = lexer1.tokenize();
-  std::vector<Token> tokens2 = lexer2.tokenize();
-  std::vector<Token> tokens3 = lexer3.tokenize();
-  std::vector<Token> tokens4 = lexer4.tokenize();
-  
-  std::cout << BLUE_COLOR << "\n[sqlQuery1]: " << GREEN_COLOR << sqlQuery1 << RESET_COLOR << "\n";
-  std::cout << MAGENTA_COLOR << "\nAnálisis Léxico: [Lexema | Tipo de token | Línea | Columna]" << RESET_COLOR << "\n";
-  printAnalisis(tokens1);
+  Lexer lexer(query);
+  auto tokens = lexer.tokenize();
 
-  std::cout << BLUE_COLOR << "\n[sqlQuery2]: " << GREEN_COLOR << sqlQuery2 << RESET_COLOR << "\n";
-  std::cout << MAGENTA_COLOR << "\nAnálisis Léxico: [Lexema | Tipo de token | Línea | Columna]" << RESET_COLOR "\n";
-  printAnalisis(tokens2);
-
-  std::cout << BLUE_COLOR << "\n[sqlQuery3]: " << GREEN_COLOR << sqlQuery3 << RESET_COLOR << "\n";
-  std::cout << MAGENTA_COLOR << "\nAnálisis Léxico: [Lexema | Tipo de token | Línea | Columna]" << RESET_COLOR << "\n";
-  printAnalisis(tokens3);
-
-
-  // PRUEBA DE LA GRAMATICA
-
-  std::cout << "\n\nProducciones de la gramatica LL(1):\n";
+  // 3. Preparar la gramatica LL(1)
 
   Grammar grammar;
 
-  for (const auto& production : grammar.getProductions()) {
-    std::cout << "(" << production.id << ") " << toString(production.lhs) << " -> ";
-
-    if (production.rhs.empty()) {
-      std::cout << "epsilon";
-    } else {
-      for (const auto& symbol : production.rhs) {
-        std::cout << toString(symbol) << " ";
-      }
-    }
-
-    std::cout << "\n";
-  }
-
-  std::cout << "\nTotal de producciones: " << grammar.getProductions().size() << "\n";
-
-
-  // Calculo de FIRST y FOLLOW
-
   FirstFollow firstFollow(grammar);
 
-  firstFollow.printFirstSets();
-  firstFollow.printFollowSets();
-  firstFollow.printLL1Conflicts();
+  if (!firstFollow.isLL1()) {
+    std::cerr << "Error: la gramática presenta conflictos LL(1).\n";
+    return 1;
+  }
 
-
-  // Construccion de la tabla LL(1)
+  // 4. Construir la tabla predictiva
 
   ParsingTable parsingTable(grammar, firstFollow);
 
-  parsingTable.printTable();
-
-  std::cout << "\n========== ESTADO DE LA TABLA ==========\n";
-
-  if (parsingTable.isValid()) {
-    std::cout << "Tabla predictiva construida correctamente.\n";
-    std::cout << "Tabla LL(1) válida.\n";
-  } else {
-    std::cout << "Error: se encontraron conflictos en la tabla.\n";
+  if (!parsingTable.isValid()) {
+    std::cerr << "Error: la tabla predictiva no es válida.\n";
+    return 1;
   }
 
+  // 5. Analisis sintáctico
 
-  // Analisis sintactico LL(1)
+  Parser parser(tokens, parsingTable, grammar);
 
-  Parser parser1(tokens1, parsingTable, grammar);
+  ParseResult result = parser.parse(true, true);
 
-  ParseResult result1 = parser1.parse(true);
+  // 6. Resultado
 
-  if (result1.accepted) {
-    std::cout << "\nResultado: CONSULTA VALIDA\n";
-  } else {
-    std::cout << "\nResultado: CONSULTA INVALIDA\n";
+  if (result.accepted) {
+    std::cout << "\nConsulta SQL sintácticamente válida.\n";
+    return 0;
   }
 
-  Parser parser2(tokens2, parsingTable, grammar);
+  std::cout << "\nConsulta SQL rechazada.\n";
 
-  ParseResult result2 = parser2.parse(true);
-
-  if (result2.accepted) {
-    std::cout << "\nResultado: CONSULTA VALIDA\n";
-  } else {
-    std::cout << "\nResultado: CONSULTA INVALIDA\n";
-  }
-
-  Parser parser4(tokens4, parsingTable, grammar);
-
-  ParseResult result4 = parser4.parse(true);
-
-  if (result4.accepted) {
-    std::cout << "\nResultado: CONSULTA VALIDA\n";
-  } else {
-    std::cout << "\nResultado: CONSULTA INVALIDA\n";
-  }
-
-  return 0;
+  return 1;
 }
 

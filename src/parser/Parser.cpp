@@ -168,12 +168,12 @@ void Parser::printError(const ParseResult& result) const {
 }
 
 // Analisis sintactico LL(1)
-ParseResult Parser::parse(bool showTrace) const {
+ParseResult Parser::parse(bool showTrace, bool showDiagnostics) const {
 
   // 1. Comprobar errores lexicos antes del parsing.
   ParseResult lexicalResult = checkLexicalErrors();
 
-  if (!lexicalResult.accepted) {
+  if (!lexicalResult.accepted && showDiagnostics) {
     printError(lexicalResult);
     return lexicalResult;
   }
@@ -184,7 +184,7 @@ ParseResult Parser::parse(bool showTrace) const {
     ParseResult result;
     result.message = "La tabla predictiva contiene conflictos LL(1).";
 
-    std::cout << result.message << "\n";
+    if (showDiagnostics) std::cout << result.message << "\n";
 
     return result;
   }
@@ -196,7 +196,7 @@ ParseResult Parser::parse(bool showTrace) const {
 
     result.message = "El vector de tokens no contiene TOKEN_EOF al final.";
 
-    std::cout << result.message << "\n";
+    if (showDiagnostics) std::cout << result.message << "\n";
 
     return result;
   }
@@ -232,7 +232,7 @@ ParseResult Parser::parse(bool showTrace) const {
     if (inputIndex >= tokens.size()) {
       ParseResult result;
       result.message = "Fin inesperado del vector de tokens.";
-      std::cout << "\n" << result.message << "\n";
+      if (showDiagnostics) std::cout << "\n" << result.message << "\n";
       return result;
     }
 
@@ -278,7 +278,7 @@ ParseResult Parser::parse(bool showTrace) const {
 
           result.message = "Se encontraron elementos despues de TOKEN_EOF.";
 
-          std::cout << result.message << "\n";
+          if (showDiagnostics) std::cout << result.message << "\n";
 
           return result;
         }
@@ -290,7 +290,7 @@ ParseResult Parser::parse(bool showTrace) const {
 
         ParseResult result = makeSyntaxError(lookahead, expected);
 
-        printError(result);
+        if (showDiagnostics) printError(result);
 
         return result;
       }
@@ -313,7 +313,7 @@ ParseResult Parser::parse(bool showTrace) const {
 
         ParseResult result = makeSyntaxError(lookahead, expected);
 
-        printError(result);
+        if (showDiagnostics) printError(result);
 
         return result;
       }
@@ -342,7 +342,7 @@ ParseResult Parser::parse(bool showTrace) const {
 
   result.message = "La pila termino antes de consumir toda la entrada.";
 
-  std::cout << result.message << "\n";
+  if (showDiagnostics) std::cout << result.message << "\n";
 
   return result;
 }

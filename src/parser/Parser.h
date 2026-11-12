@@ -59,7 +59,7 @@ public:
     const Grammar& grammar
   );
 
-  ParseResult parse(bool showTrace = true) const;
+  ParseResult parse(bool showTrace = true, bool showDiagnostics = true) const;
 };
 
 #endif
