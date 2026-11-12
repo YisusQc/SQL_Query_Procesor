@@ -161,3 +161,22 @@ bool ParsingTable::isValid() const {
   return valid;
 }
 
+// Consultar los tokens esperados
+std::set<TokenType> ParsingTable::getExpectedTokens(
+  NonTerminal nt
+) const {
+  std::set<TokenType> expected;
+
+  auto row = table.find(nt);
+
+  if (row == table.end()) {
+    return expected;
+  }
+
+  for (const auto& [terminal, productionId] : row->second) {
+    expected.insert(terminal);
+  }
+
+  return expected;
+}
+

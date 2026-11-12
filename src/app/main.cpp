@@ -4,6 +4,7 @@
 #include "../parser/Grammar.h"
 #include "../parser/FirstFollow.h"
 #include "../parser/ParsingTable.h"
+#include "../parser/Parser.h"
 
 #define GREEN_COLOR "\033[32m"
 #define BLUE_COLOR "\033[34m"
@@ -59,14 +60,17 @@ int main() {
   std::string sqlQuery1 = "SELECT nombre, edad FROM estudiantes WHERE edad >= 18;";
   std::string sqlQuery2 = "SelEcT * FroM estudiantes wHErE nombre <> 'Jesus AnD edad <= 23;";
   std::string sqlQuery3 = "select nombre, score from \nestudiantes where nombre <> 'Jesus' \nand score <= 15.234 or ID # '4321;";
+  std::string sqlQuery4 = "SELECT nombre FROM estudiantes WHERE edad >= ;";
 
   Lexer lexer1(sqlQuery1);
   Lexer lexer2(sqlQuery2);
   Lexer lexer3(sqlQuery3);
+  Lexer lexer4(sqlQuery4);
   
   std::vector<Token> tokens1 = lexer1.tokenize();
   std::vector<Token> tokens2 = lexer2.tokenize();
   std::vector<Token> tokens3 = lexer3.tokenize();
+  std::vector<Token> tokens4 = lexer4.tokenize();
   
   std::cout << BLUE_COLOR << "\n[sqlQuery1]: " << GREEN_COLOR << sqlQuery1 << RESET_COLOR << "\n";
   std::cout << MAGENTA_COLOR << "\nAnálisis Léxico: [Lexema | Tipo de token | Línea | Columna]" << RESET_COLOR << "\n";
@@ -127,7 +131,40 @@ int main() {
   } else {
     std::cout << "Error: se encontraron conflictos en la tabla.\n";
   }
- 
+
+
+  // Analisis sintactico LL(1)
+
+  Parser parser1(tokens1, parsingTable, grammar);
+
+  ParseResult result1 = parser1.parse(true);
+
+  if (result1.accepted) {
+    std::cout << "\nResultado: CONSULTA VALIDA\n";
+  } else {
+    std::cout << "\nResultado: CONSULTA INVALIDA\n";
+  }
+
+  Parser parser2(tokens2, parsingTable, grammar);
+
+  ParseResult result2 = parser2.parse(true);
+
+  if (result2.accepted) {
+    std::cout << "\nResultado: CONSULTA VALIDA\n";
+  } else {
+    std::cout << "\nResultado: CONSULTA INVALIDA\n";
+  }
+
+  Parser parser4(tokens4, parsingTable, grammar);
+
+  ParseResult result4 = parser4.parse(true);
+
+  if (result4.accepted) {
+    std::cout << "\nResultado: CONSULTA VALIDA\n";
+  } else {
+    std::cout << "\nResultado: CONSULTA INVALIDA\n";
+  }
+
   return 0;
 }
 

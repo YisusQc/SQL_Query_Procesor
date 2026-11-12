@@ -53,6 +53,9 @@ public:
 
   // Verificar que todas las producciones aplicables hayan sido insertadas sin conflictos.
   bool isValid() const;
+
+  // Consultar los tokens esperados
+  std::set<TokenType> getExpectedTokens(NonTerminal nt) const;
 };
 
 #endif

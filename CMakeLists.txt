@@ -14,6 +14,7 @@ add_executable(sql_processor
   src/parser/Grammar.cpp
   src/parser/FirstFollow.cpp
   src/parser/ParsingTable.cpp
+  src/parser/Parser.cpp
 )
 
 target_include_directories(sql_processor PRIVATE
