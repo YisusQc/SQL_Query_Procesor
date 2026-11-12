@@ -6,16 +6,39 @@
 using namespace TestSupport;
 
 int main() {
-  std::cout << "\n========== PRUEBAS DE GRAMATICA ==========\n";
 
   Grammar grammar;
+
+  std::cout << "\nProducciones de la gramatica LL(1):\n";
+
+  for (const auto& production : grammar.getProductions()) {
+    std::cout << "(" << production.id << ") "
+              << toString(production.lhs)
+              << " -> ";
+
+    if (production.rhs.empty()) {
+      std::cout << "epsilon";
+    } else {
+      for (const auto& symbol : production.rhs) {
+        std::cout << toString(symbol) << " ";
+      }
+    }
+
+    std::cout << "\n";
+  }
+
+  FirstFollow firstFollow(grammar);
+
+  firstFollow.printFirstSets();
+  firstFollow.printFollowSets();
+  firstFollow.printLL1Conflicts();
+
+  std::cout << "\n\n========== PRUEBAS DE GRAMATICA ==========\n";
 
   check(
     grammar.getProductions().size() == 27,
     "La gramatica contiene 27 producciones"
   );
-
-  FirstFollow firstFollow(grammar);
 
   check(
     firstFollow.getFirst(NonTerminal::QUERY).count(
